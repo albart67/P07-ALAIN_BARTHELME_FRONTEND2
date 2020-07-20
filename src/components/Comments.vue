@@ -32,7 +32,7 @@
               v-bind:key="comment.id"
               v-bind:title="comment.comment"
             >
-              <li class="list-group-item">{{comment.id}}</li>
+              <li class="list-group-item">{{comment.user.first_name }} {{ comment.user.last_name}}</li>
               <li class="list-group-item">{{comment.comment}}</li>
               <li class="list-group-item">
                 <button
@@ -110,7 +110,8 @@ export default {
       axios
         .post("http://localhost:5000/api/NewComment", {
           comment: this.comment,
-          userId: 2
+          userId: 1,
+          messageId: 1
         })
         .then(res => {
           this.comment = "";
@@ -168,7 +169,7 @@ export default {
 
     deleteComment(id) {
       axios
-        .delete(`http://localhost:5000/api/comment/${id}`)
+        .delete(`http://localhost:5000/api/comments/${id}`)
         .then(res => {
           this.comment = "";
           this.getComments();

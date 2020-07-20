@@ -12,6 +12,16 @@
               class="form-control"
               placeholder="ajouter un message"
             />
+            <div class="form-group">
+              <label for="imageURL">Image URL</label>
+              <input
+                v-model="imageURL"
+                type="url"
+                class="form-control"
+                id="imageURL"
+                placeholder="Put an image URL"
+              />
+            </div>
             <button
               v-if="this.isEdit == false"
               type="submit"
@@ -32,8 +42,14 @@
               v-bind:key="message.id"
               v-bind:title="message.message"
             >
-              <li class="list-group-item">{{message.id}}</li>
+              <li class="list-group-item">{{message.user.first_name }} {{ message.user.last_name}}</li>
               <li class="list-group-item">{{message.message}}</li>
+              <img
+                v-if="message.imageURL"
+                class="mr-3"
+                :src="message.imageURL"
+                :alt="message.subject"
+              />
               <li class="list-group-item">
                 <button
                   v-on:click="editMessage(message.title, message.id)"
@@ -74,11 +90,19 @@ import axios from "axios";
 
 export default {
   data() {
+    const token = localStorage.usertoken;
+    const decoded = jwtDecode(token);
+
     return {
       messages: [],
       id: "",
       message: "",
-      isEdit: false
+      isEdit: false,
+      imageURL: "",
+      userId: decoded.id,
+      first_name: decoded.first_name,
+      last_name: decoded.last_name,
+      email: decoded.email
     };
   },
   mounted() {
@@ -113,11 +137,13 @@ export default {
     addNewMessage() {
       axios
         .post("http://localhost:5000/api/message", {
+          imageURL: this.imageURL,
           message: this.message,
           userId: 2
         })
         .then(res => {
           this.message = "";
+          this.messageURL;
           this.getMessages();
           console.log(res);
         })
@@ -171,16 +197,18 @@ export default {
     },
 
     deleteMessage(id) {
-      axios
-        .delete(`http://localhost:5000/api/message/${id}`)
-        .then(res => {
-          this.message = "";
-          this.getMessages();
-          console.log(res);
-        })
-        .catch(err => {
-          console.log(err);
-        });
+      axios.delete(`http://localhost:5000/api/message/${id}`),
+        {
+          userId: this.userId
+        }
+          .then(res => {
+            this.message = "";
+            this.getMessages();
+            console.log(res);
+          })
+          .catch(err => {
+            console.log(err);
+          });
     }
   }
 };
